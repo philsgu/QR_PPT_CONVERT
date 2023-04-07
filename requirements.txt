@@ -1,0 +1,5 @@
+Pillow==9.5.0
+PyPDF2==3.0.1
+python_pptx==0.6.21
+qrcode==7.3.1
+streamlit==1.16.0
