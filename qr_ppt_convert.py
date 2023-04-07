@@ -112,7 +112,7 @@ def main():
     3. Use the select box or all to highlight desired applicants
     4. Select **Action to perfrom on slected applicants:** options and Choose **View/Print Application**
     5. Look for in **Other** section **Applicant Summary** which contains applicant photo, AAMC ID, and Medical School information
-    6. Select **Print each application to separate PDF
+    6. Select **Print each application to separate PDF**
     7. Type in Print Job Name of choosing then select **Request Print**
     8. Go back to **Bulk Print Request** on output status.  Note: Depending on applicant requests and server demand, ERAS will take a while for this
     9. Save the Zip compiled applicant to your local drive.  Unzip and upload in bulk below.  Note: if you want alphabetical order for PowerPoint slides, you will have to filter by Name in your folder option upon upload\n
