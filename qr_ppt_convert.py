@@ -101,9 +101,8 @@ def google_url_qrimage(url_substring, full_name):
     
 # Define the Streamlit app
 def main():
-    if 'files' not in st.session_state:
-        st.session_state['files']=[]
-        
+ 
+
     st.title("PDF Image Extractor and QR Generator to PowerPoint Slides")
     st.write(f"Last update:4/06/23 [Phillip Kim, MD, MPH](https://www.doximity.com/pub/phillip-kim-md-8dccc4e4)")
     st.info('Convert ERAS applicant summary facesheet into PowerPoint slides for custom Rank Meetings and Evaluations')
