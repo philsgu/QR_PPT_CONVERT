@@ -176,9 +176,13 @@ def main():
             height = Inches(2)
 
             # Add applicant image 
-            if image_data:
+            try:
+                Image.open(io.BytesIO(image_data))
+            except IOError:
+                st.error("The extracted image data is not a valid image file format.")
+            else:
+                image_data = resize_image(image_data)
                 slide.shapes.add_picture(io.BytesIO(image_data), Inches(1), top)
-            # Add QR URL image
             if qr_image:
                 slide.shapes.add_picture(io.BytesIO(qr_image), Inches(5), Inches(2))
             
