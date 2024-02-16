@@ -64,6 +64,11 @@ def validate_input(url_field):
 #RESIZED RAW IMAGE 
 def resize_image(image_data):
     # Load the image data into a Pillow Image object
+    image = Image.open(io.BytesIO(image_data)).convert('RGB')
+    output = io.BytesIO()
+    image.save(output, format='JPEG')
+    image_data = output.getvalue() 
+
     image = Image.open(io.BytesIO(image_data))
    
     new_width = int(2.5 * 75)
