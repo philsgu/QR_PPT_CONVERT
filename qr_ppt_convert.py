@@ -136,8 +136,8 @@ def main():
     clear_button = st.button("Clear PDF Files")
 
     if clear_button:
-        st.session_state['files'] = []
-        
+        st.session_state['files'] = None
+
     url_field = st.text_input("Enter Google Forms URL")
     url_substring = validate_input(url_field)
 
