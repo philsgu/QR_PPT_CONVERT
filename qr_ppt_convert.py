@@ -64,7 +64,12 @@ def validate_input(url_field):
 #RESIZED RAW IMAGE 
 def resize_image(image_data):
     # Load the image data into a Pillow Image object
-    image = Image.open(io.BytesIO(image_data)).convert('RGB')
+
+    try:
+        image = Image.open(io.BytesIO(image_data))
+    except PIL.UnidentifiedImageError as error:
+        print(type(image_data))
+        raise error
    
    
     new_width = int(2.5 * 75)
