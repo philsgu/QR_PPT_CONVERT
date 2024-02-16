@@ -38,14 +38,16 @@ def extract_image_from_pdf(pdf_file):
         resources = pdf.trailer["/Root"].get_object()["/Pages"].get_object()["/Kids"][0].get_object()["/Resources"].get_object()
         xObject = resources["/XObject"]
         # Find the first image on the page
+        
         for obj in xObject:
             if xObject[obj]["/Subtype"] == "/Image":
                 # Get the image data
                 image_data = xObject[obj]._data
                 # Convert the image data to a PIL Image object
-                #pil_image = Image.open(io.BytesIO(image_data))
-                
-        return image_data, full_name, aamc_id, med_school
+                #pil_image = Image.open(io.BytesIO(image_data)
+                return image_data, full_name, aamc_id, med_school
+            else:
+                return None, full_name, aamc_id, med_school
 
 #create Validate URL 
 def validate_input(url_field):
