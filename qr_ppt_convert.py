@@ -1,6 +1,6 @@
 import streamlit as st
 from PyPDF2 import PdfReader
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 import io
 import re
 from pptx import Presentation
@@ -9,17 +9,12 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_AUTO_SIZE, PP_PARAGRAPH_ALIGNMENT
 import qrcode
 
-
-# Define a function to extract the first page of a PDF file as an image
 def extract_image_from_pdf(pdf_file):
-    # Load the PDF file using PyPDF2
     with pdf_file as f:
         pdf = PdfReader(f)
-        # Get the first page of the PDF as an image
         page = pdf.pages[0]
         text = page.extract_text()
         
-        #get applicant identifiers
         aamc_id = text.split(' ')[2]
         pattern = r"\((\d+)\)"
         aamc_id = re.search(pattern, text).group(1)
@@ -30,24 +25,15 @@ def extract_image_from_pdf(pdf_file):
         prefix = "Most Recent Medical School:"
         recent_med_school = text.split(suffix)[0].strip()
         med_school = recent_med_school.split(prefix)[1].strip()
-    
-        # st.write(med_school)
-        # st.write(aamc_id)
-        # st.write(full_name)
-        
+
         resources = pdf.trailer["/Root"].get_object()["/Pages"].get_object()["/Kids"][0].get_object()["/Resources"].get_object()
         xObject = resources["/XObject"]
-        # Find the first image on the page
-        
+
         for obj in xObject:
             if xObject[obj]["/Subtype"] == "/Image":
-                # Get the image data
                 image_data = xObject[obj]._data
-                # Convert the image data to a PIL Image object
-                #pil_image = Image.open(io.BytesIO(image_data)
-                return image_data, full_name, aamc_id, med_school
-            else:
-                return None, full_name, aamc_id, med_school
+                
+        return image_data, full_name, aamc_id, med_school
 
 #create Validate URL 
 def validate_input(url_field):
@@ -60,6 +46,7 @@ def validate_input(url_field):
             return url_substring
         else:
             st.error("No 'valid URL entry ID with =' sign found in the URL given.")
+
 
 #RESIZED RAW IMAGE 
 def resize_image(image_data):
@@ -77,34 +64,32 @@ def resize_image(image_data):
     output_buffer.seek(0)
     resized_image_data = output_buffer.read()
     return resized_image_data
-   
-   
-            
-#create a QR Code image from entered URL field
-def google_url_qrimage(url_substring, full_name):
-    google_name_entry = url_substring + full_name
 
-    # Generate the QR code
-    qr = qrcode.QRCode(
-        version=None,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=2,
-        border=4
-        )
-    qr.add_data(google_name_entry)
-    qr.make(fit=True)
-    # Save the QR code as an image 
-    qr_img = qr.make_image(fill_color="black", back_color="white")
-    # Convert the image to bytes
-    qr_img_bytes = io.BytesIO()
-    qr_img.save(qr_img_bytes, format="PNG")
-    qr_img_data = qr_img_bytes.getvalue()
-    return qr_img_data
-    
-# Define the Streamlit app
+
+def google_url_qrimage(user_input, full_name):
+    equals_index = user_input.find("=", user_input.find("=")+1)
+    if equals_index != -1: 
+        url_substring = user_input[:equals_index + 1]
+        st.success("Valid Google Form URL Form User Input ID")
+        google_name_entry = url_substring + full_name
+        print(google_name_entry)
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=2,
+            border=4
+            )
+        qr.add_data(google_name_entry)
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="black", back_color="white")
+        qr_img_bytes = io.BytesIO()
+        qr_img.save(qr_img_bytes, format="PNG")
+        qr_img_data = qr_img_bytes.getvalue()
+        return qr_img_data
+    else:
+        st.error("No 'value URL entry ID with =' sign found in the URL given.")
+
 def main():
- 
-
     st.title("PDF Image Extractor and QR Generator to PowerPoint Slides")
     st.write(f"Last update:4/06/23 [Phillip Kim, MD, MPH](https://www.doximity.com/pub/phillip-kim-md-8dccc4e4)")
     st.info('Convert ERAS applicant summary facesheet into PowerPoint slides for custom Rank Meetings and Evaluations')
@@ -134,36 +119,17 @@ def main():
     9. Paste EXACTLY WITHOUT MODIFICATION into **Enter Google Forms URL** below
     """
     )
-
-    # Create a file uploader using Streamlit's file_uploader widget
-    pdf_files = st.file_uploader("Upload PDF file(s)", type=["pdf"], accept_multiple_files=True, key='files')
-
+    pdf_files = st.file_uploader("Upload a PDF file", type=["pdf"], accept_multiple_files=True)
     url_field = st.text_input("Enter Google Forms URL")
     url_substring = validate_input(url_field)
 
-    if url_substring and st.session_state['files']:
-    # Process each PDF files
-    # create a loop for each upload PDF
-    #create presentation file to be appended
+    if pdf_files is not None:
         prs = Presentation()
         for index, pdf_file in enumerate(pdf_files):   
-            
-            # Extract the image from the PDF file
             image_data, full_name, aamc_id, med_school = extract_image_from_pdf(pdf_file)
-            # st.write(full_name)
-            # st.write(aamc_id)
-            
-            #resize the image 
-            image_data = resize_image(image_data)
-            # # Show the image in Streamlit using Streamlit's image widget
-            # st.image(image_data, caption="First page of PDF")
-            # PASS url_field into function to get image_data
-            
-            qr_image = google_url_qrimage(url_substring, full_name)
+            qr_image = google_url_qrimage(url_field, full_name)
             name_url = url_substring + full_name
 
-            print (url_substring+full_name)
-            # Set the properties for the slide numbers
             total_slides = len(pdf_files)
             slide_number_font = 'Arial'
             slide_number_font_size = Pt(12)
@@ -175,7 +141,6 @@ def main():
             width = Inches(4)
             height = Inches(2)
 
-            # Add applicant image 
             try:
                 Image.open(io.BytesIO(image_data))
             except IOError:
@@ -183,11 +148,10 @@ def main():
             else:
                 image_data = resize_image(image_data)
                 slide.shapes.add_picture(io.BytesIO(image_data), Inches(1), top)
+
             if qr_image:
                 slide.shapes.add_picture(io.BytesIO(qr_image), Inches(5), Inches(2))
             
-            # Add the applicant name and medical school to the slide
-            # Add a text box to the slide
             text_box = slide.shapes.add_textbox(Inches(5), top + Inches(2), width, height)
             text_frame = text_box.text_frame
             text_frame.word_wrap = True
@@ -199,21 +163,17 @@ def main():
             hyperlink = run.hyperlink
             hyperlink.address = name_url
 
-
-            # Set the font to Arial and the font size to 24 points for the first line
             font = text_frame.paragraphs[0].font
             font.name = 'Arial'
             font.size = Pt(24)
 
-            # Set the font to Arial and the font size to 18 points for the rest of the text
             for paragraph in text_frame.paragraphs[1:]:
                 for run in paragraph.runs: 
                     font = run.font
                     font.name = 'Arial'
                     font.size = Pt(16)
                     
-            # Add slide numbers to the slide
-            slide_number_text = f'{index+1}/{total_slides}'
+            slide_number_text = f'Slide: {index+1}/{total_slides}'
             slide_number_box = slide.shapes.add_textbox(*slide_number_position, width=Inches(1), height=Inches(0.2))
             slide_number_frame = slide_number_box.text_frame
             slide_number_frame.text = slide_number_text
@@ -221,16 +181,14 @@ def main():
             slide_number_frame.paragraphs[0].font.size = slide_number_font_size
             slide_number_frame.paragraphs[0].font.color.rgb = slide_number_color
             slide_number_frame.paragraphs[0].alignment = PP_PARAGRAPH_ALIGNMENT.RIGHT
-                
+            
         # Save the PowerPoint file
         pptx_file = io.BytesIO()
         prs.save(pptx_file)
         pptx_file.seek(0)
             
-        with st.spinner ("Converting into PPT format..."):
-            # Download the PowerPoint file
-            st.download_button(label="Download PowerPoint", data=pptx_file, file_name="present.pptx", mime="application/vnd.openxmlformats-officedocument.presentationml.presentation")
+        # Download the PowerPoint file
+        st.download_button(label="Download PowerPoint", data=pptx_file, file_name="present.pptx", mime="application/vnd.openxmlformats-officedocument.presentationml.presentation")
 
 if __name__ == "__main__":
     main()
-
