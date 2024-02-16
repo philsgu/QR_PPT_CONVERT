@@ -1,6 +1,6 @@
 import streamlit as st
 from PyPDF2 import PdfReader
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import io
 import re
 from pptx import Presentation
