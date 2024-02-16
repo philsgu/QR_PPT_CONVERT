@@ -67,22 +67,23 @@ def resize_image(image_data):
 
     try:
         image = Image.open(io.BytesIO(image_data))
+        new_width = int(2.5 * 75)
+        new_height = int(3.5 * 75)
+        #resize the image
+        resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
+
+        # Convert the resized image back to raw image data
+        output_buffer = io.BytesIO()
+        resized_image.save(output_buffer, format="PNG")
+        output_buffer.seek(0)
+        resized_image_data = output_buffer.read()
+        return resized_image_data
     except PIL.UnidentifiedImageError as error:
         print(type(image_data))
-        raise error
+        #raise error
    
    
-    new_width = int(2.5 * 75)
-    new_height = int(3.5 * 75)
-    #resize the image
-    resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
-
-    # Convert the resized image back to raw image data
-    output_buffer = io.BytesIO()
-    resized_image.save(output_buffer, format="PNG")
-    output_buffer.seek(0)
-    resized_image_data = output_buffer.read()
-    return resized_image_data
+   
             
 #create a QR Code image from entered URL field
 def google_url_qrimage(url_substring, full_name):
