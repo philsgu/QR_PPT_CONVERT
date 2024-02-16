@@ -137,8 +137,6 @@ def main():
     pdf_files = st.file_uploader("Upload PDF file(s)", type=["pdf"], accept_multiple_files=True, key='files')
     clear_button = st.button("Clear PDF Files")
 
-    if clear_button:
-        pdf_files = []
 
     url_field = st.text_input("Enter Google Forms URL")
     url_substring = validate_input(url_field)
